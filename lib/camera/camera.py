@@ -1,13 +1,21 @@
-'''
-This should import all the different functions from each task and
-Output return a tuple of sensor output
+from Calibrate.calibrate import calibrate 
+from Classification.classification import turnDirection
+from ObjectDetection.object_detection import detect_object
+from LaneDetection.lane_detection import detect_lane
 
-This code should run all all the tasks in this folder and return a tuple of outputs 
-for the control to read:
 
-e.g.
+#Executes all the camera stuff and returns a dictionary for the state to control
 
-tuple(Lane detection,Classification (Take Left turn, Nothing, Turn Right), Object Detection (
+def GetCameraData(img,turn_net,obj_net,camera_settings):
 
-Probably need to talk about it ...
-'''
+    hsv_masks = camera_settings['hsv_masks']
+    img = calibrate(img)
+    turn = turnDirection(img,turn_net)
+    obstacle =detect_object(img,obj_net )
+    b_lane,y_lane = detect_lane(img,hsv_masks)
+
+    return {'turn':turn,
+            'obstacle': obstacle,
+            'blue_lane': b_lane,
+            'yellow_lane':y_lane
+             }
