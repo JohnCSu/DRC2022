@@ -13,7 +13,7 @@ import numpy as np
 
 
 def detect_lane(img,hsv_masks):
-    blur_frame = cv2.GaussianBlur(frame,(5,5),0)
+    blur_frame = cv2.GaussianBlur(img,(5,5),0)
     #Convert to HSV color scheme
     HSV_f = cv2.cvtColor(blur_frame,cv2.COLOR_BGR2HSV)
     #Hue Range is 0 to 180
