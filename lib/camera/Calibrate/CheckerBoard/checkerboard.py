@@ -5,10 +5,11 @@ import time
 import glob
 import matplotlib.pyplot as plt
 import os
+import pickle
 #This will get a video feed of the camera and calibrate
 
 
-def getCheckboardImages(path = "lib\\camera\\Calibrate\\CheckerBoard\\"):
+def getCheckboardImages(path = './'):
     vid =cv2.VideoCapture(1)
     print('starting in:\n')
 
@@ -43,7 +44,7 @@ def getCheckboardImages(path = "lib\\camera\\Calibrate\\CheckerBoard\\"):
 
  
 
-def calibrateFromImages(path = "lib\\camera\\Calibrate\\CheckerBoard\\",viewImgs = True): 
+def calibrateFromImages(path = './',viewImgs = True): 
 # The source for this code can be found below:
 # 
 # https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
@@ -97,10 +98,25 @@ def CompareImages(path,mtx,dist,OptMtxCam = True):
 
 
 if __name__ == '__main__':
-    path = os.getcwd()+"\\lib\\camera\\Calibrate\\CheckerBoard\\"
+    print(__file__)
+    path = './'
     
     # print(path)
     # getCheckboardImages(path)
     
-    mtx,dist = calibrateFromImages(path,False)
-    CompareImages(path,mtx,dist)
+    # mtx,dist = calibrateFromImages(path,False)
+    
+    # with open('calibration_params','wb') as f:
+    #     pickle.dump((mtx,dist),f)
+    # print(__file__)
+    
+    with open('calibration_params','rb') as f:
+        mtx,dist = pickle.load(f) 
+    vid = cv2.VideoCapture(1)
+    # CompareImages(path,mtx,dist)
+    while(1):
+        ret, img = vid.read()
+        img2 = cv2.undistort(img,mtx,dist)
+        cv2.imshow('orig',img)
+        cv2.imshow('undistort',img2)
+        cv2.waitKey(1)
