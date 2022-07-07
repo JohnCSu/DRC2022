@@ -42,6 +42,7 @@ class camera():
                 self.cam = cv2.VideoCapture(cam_num,cv2.CAP_DSHOW)
             else:
                 self.cam = cv2.VideoCapture(cam_num)
+        
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])  # set new dimensionns to cam object (not cap)
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
         self.width  = self.cam.get(cv2.CAP_PROP_FRAME_WIDTH)   # float `width`
