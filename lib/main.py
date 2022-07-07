@@ -1,4 +1,67 @@
 #Function should execute control and send a state to 
+from camera.camera import camera
+from control.control import control
+from microcontroller.send_serial import arduino
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
 
+
+CALIBRATE = False
+TEST = True
+cal_480p = np.float32([[200,153],[445,153],[0,351],[639,351]])
 if __name__ == '__main__':
-    return 0
+    if CALIBRATE:
+        img = plt.imread('480P_cal.jpg')
+        plt.imshow(img)
+        plt.show()
+        exit()
+
+    if TEST:
+        data = input('Enter g to start')
+        if data is not 'g':
+            exit()
+
+    out = cv2.VideoWriter('Drive.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (640,480))
+    
+
+    cam = camera(cam_num=1)
+    ret,img = cam.read()
+    img2 = cam.birdsEye(img)
+    w,h = img2.shape[1],img2.shape[0]
+    bird_out = cv2.VideoWriter('Birdseye.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
+    lane_out = cv2.VideoWriter('Lanes.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
+    cam.src = cal_480p
+    ctrl = control()
+    ard = arduino() #Auto start the
+    f = []
+    while(1):
+        ret,img = cam.read()
+        f.append(img)
+        data = cam.GetCameraData(img)
+        angle,speed,target_point = ctrl.Decision(data)
+        ard.sendData(angle,speed = 100,state = 1)
+
+        if TEST:
+            cv2.imshow('main',img)
+            cv2.imshow('blue',data['blue_lane'])
+            cv2.imshow('yellow',data['yellow_lane'])
+            img2 = cam.birdsEye(img)
+            cv2.circle(img2,target_point,radius =10,color = (0,255,0),thickness =5 )
+            cv2.imshow('target point', img2)
+            bird_out.write(img2)
+            out.write(img)
+            lane_out.write(cv2.bitwise_or(data['blue_lane'],data['yellow_lane']))
+            print(angle,target_point)
+            
+            k = cv2.waitKey(1)
+            if k%256 == 27:
+                # ESC pressed
+                print("Escape hit, closing...")
+                break
+            # print(data.keys())
+
+    print('done!')
+    cv2.destroyAllWindows()
+    out.release()
+    ard.sendData(state = 0)

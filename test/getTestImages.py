@@ -43,8 +43,28 @@ def getTestImages(folder = 'laneDetection',numImages = 20,img_delay = 1.5):
     
     print('DONE!')
 
+
+def takePhoto():
+    #OPens up a window allowing you to take a photo
+    #By pressing SPACEBAR and saves it
+    cam = cv2.VideoCapture(1,cv2.CAP_DSHOW)
+    while(1):
+        ret, img = cam.read()
+        # print(ret)
+        cv2.imshow('window',img)
+        k = cv2.waitKey(1)
+        if k%256 == 27:
+            # ESC pressed
+            print("Escape hit, closing...")
+            break
+        elif k%256 == 32:
+            # SPACE pressed
+            img_name = "test.png"
+            cv2.imwrite(img_name, img)
+            print("{} written!".format(img_name))
+            break
 if __name__ == '__main__':
     #Set this folder as root    
     print(os.getcwd())
-
-    getTestImages(folder = 'classification',numImages = 10)
+    takePhoto()
+    # getTestImages(folder = 'classification',numImages = 10)
