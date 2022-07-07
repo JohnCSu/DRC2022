@@ -13,6 +13,9 @@ import numpy as np
 
 
 def detect_lane(img,hsv_masks):
+    '''
+    img:Birdseyeimag
+    '''
     blur_frame = cv2.GaussianBlur(img,(5,5),0)
     #Convert to HSV color scheme
     HSV_f = cv2.cvtColor(blur_frame,cv2.COLOR_BGR2HSV)
@@ -30,15 +33,21 @@ def detect_lane(img,hsv_masks):
 #The code in this if statement will only run when you run the script (it wont run when you import this)
 if __name__ == '__main__':
     #Feel free to modify where fit
-    vid = cv2.VideoCapture(0) # Capture From camera
-    ret,frame = vid.read() #Get img fram from camera
-
+    vid = cv2.VideoCapture('test2.mp4') # Capture From camera
     masks = {
     'blue' : ( np.array([180//2, 63, 63]) , np.array([270//2, 255, 255])),
     'yellow':(np.array([40//2, 63, 63]),np.array([60//2, 255, 255]))
     }
-    img = detect_lane(frame,masks)
     
+    while(vid.isOpened()):
+        ret,frame = vid.read() #Get img fram from camera
+        if ret:
+            imgs = detect_lane(frame,masks)
+            cv2.imshow('lane',cv2.bitwise_or(imgs[0],imgs[1]))
+        else:
+            break
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
     # cv2.imshow(img)
     
 

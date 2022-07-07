@@ -10,40 +10,28 @@ import pickle
 
 
 def getCheckboardImages(path = './'):
-    vid =cv2.VideoCapture(1)
-    print('starting in:\n')
-
-    start = time.perf_counter()
-    i = 0
-    while(i < 6):
-        ret,frame = vid.read()
-        cv2.imshow('start',frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        if time.perf_counter()- start > 1:
-            print(i)
-            i += 1
-            start = time.perf_counter()
-
-
-    imgName = 0
-    start = time.perf_counter()
-    while(imgName < 20):
-        ret,frame = vid.read()
-        cv2.imshow('screenshot',frame)
-        if time.perf_counter()-start > 2.0:
-            cv2.imwrite(path + str(imgName)+'.png',frame)
-            print(f'{imgName} has been taken')
-            imgName += 1
-            start = time.perf_counter()
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    cam =cv2.VideoCapture(1,cv2.CAP_DSHOW)
+    count = 0
+    while(count < 20):
+        ret, img = cam.read()
         
-    
+        cv2.imshow('video',img)
+        
+        k = cv2.waitKey(1)
+        if k%256 == 27:
+            # ESC pressed
+            print("Escape hit, closing...")
+            break
+        elif k%256 == 32:
+            # SPACE pressed
+            img_name = f"{count}.png"
+            cv2.imwrite(img_name, img)
+            print("{} written!".format(img_name))
+            count+=1
+        
     print('DONE!')
 
  
-
 def calibrateFromImages(path = './',viewImgs = True): 
 # The source for this code can be found below:
 # 
@@ -97,26 +85,55 @@ def CompareImages(path,mtx,dist,OptMtxCam = True):
     cv2.waitKey(0)
 
 
+
+
+
+
 if __name__ == '__main__':
-    print(__file__)
-    path = './'
     
+    path = os.path.dirname(__file__)
+    to_cal = False
+
+
+    # a = plt.imread('0.png')
+    # print(a.shape)
+    # exit()
     # print(path)
-    # getCheckboardImages(path)
-    
-    # mtx,dist = calibrateFromImages(path,False)
-    
-    # with open('calibration_params','wb') as f:
-    #     pickle.dump((mtx,dist),f)
-    # print(__file__)
-    
-    with open('calibration_params','rb') as f:
+    if to_cal:
+        getCheckboardImages(path)
+        
+        # mtx,dist = calibrateFromImages(path,False)
+        mtx,dist = calibrateFromImages()
+        with open('calibration_params','wb') as f:
+            pickle.dump((mtx,dist),f)
+        # print(__file__)
+
+    with open(os.path.join(path,'calibration_params'),'rb') as f:
         mtx,dist = pickle.load(f) 
-    vid = cv2.VideoCapture(1)
+    vid = cv2.VideoCapture(1,cv2.CAP_DSHOW)
+    # vid.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)  # set new dimensionns to cam object (not cap)
+    # vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 576)
     # CompareImages(path,mtx,dist)
+    
+    t = 0
+    f = 0
+    
+    SPF =int(1/30*1000)
     while(1):
+        start = time.perf_counter()
         ret, img = vid.read()
-        img2 = cv2.undistort(img,mtx,dist)
-        cv2.imshow('orig',img)
-        cv2.imshow('undistort',img2)
-        cv2.waitKey(1)
+        if ret:
+        # img2 = cv2.undistort(img,mtx,dist)
+            cv2.imshow('orig',img)
+            # print(img.shape)
+            # cv2.imshow('undistort',img2)
+            # cv2.waitKey(1)
+            if cv2.waitKey(1)%256 == 27:
+                # ESC pressed
+                print("Escape hit, closing...")
+                break
+            # time.sleep(SPF)
+            t += time.perf_counter() - start
+            f +=1
+    
+    print(f'Total Frames: {f} \t Total Time: {t}\n FPS = {f/t}')
