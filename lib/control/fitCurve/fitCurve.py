@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-
+from math import isinf
 
 def findLane(*imgs,rho=2,theta = 2*np.pi/180,minLineLength=100,maxLineGap=50,threshold=100):
     '''
@@ -32,7 +32,7 @@ def findTargetPoint(w,lanes):
     #Always left lane first then right lane
     p = []
     for i,lane in enumerate(lanes):
-        if lane[0] == np.inf:
+        if isinf(lane[0]):
             if i == 0: #Left Lane
                 x = 0
             else: #Right Lane

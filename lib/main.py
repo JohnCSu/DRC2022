@@ -12,20 +12,28 @@ import keyboard
 #Argument Parser
 CALIBRATE = False
 TEST = False
+SHOW = False
 RES = '480p'
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c','--calibrate',help = 'Calibration Flag',type = bool, choices= [True ,False])
 parser.add_argument('-t','--test', help = 'Test Flag default False',type = bool, choices= [True, False])
+parser.add_argument('-s','--show', help = 'Show Video Stream Flag default False',type = bool, choices= [True, False])
 args = parser.parse_args()
+
 if args.calibrate:
     CALIBRATE = True
 if args.test:
     TEST = True
+if args.show:
+    SHOW = True
+
 
 print(f'Calibratoin is {"on" if CALIBRATE else "off"}\n \
-Testing is {"on" if TEST else "off"} \n') 
+Testing is {"on" if TEST else "off"} \n')
+print(f'Showing Img feed is {"on" if TEST else "off"} \n' ) 
+
 cal_480p = np.float32([[200,153],[445,153],[0,351],[639,351]])
 
 
@@ -33,9 +41,10 @@ cal_480p = np.float32([[200,153],[445,153],[0,351],[639,351]])
 
 if platform == 'linux':
     usb_name = '/dev/ttyUSB0'
+    cam_num=0
 else:
     usb_name = 'COM5'
-    
+    cam_num=1
 
 
 
@@ -54,7 +63,7 @@ if __name__ == '__main__':
     out = cv2.VideoWriter('Drive.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (640,480))
     
 
-    cam = camera(cam_num=0)
+    cam = camera(cam_num)
     ret,img = cam.read()
     img2 = cam.birdsEye(img)
     w,h = img2.shape[1],img2.shape[0]
@@ -74,23 +83,22 @@ if __name__ == '__main__':
 
             if TEST:
                 img2 = cam.birdsEye(img)
-                
-                cv2.imshow('main',img)
-                cv2.imshow('blue',data['blue_lane'])
-                cv2.imshow('yellow',data['yellow_lane'])
-                cv2.circle(img2,target_point,radius =10,color = (0,255,0),thickness =5 )
-                cv2.imshow('target point', img2)
-
-
+                if SHOW:    
+                    cv2.imshow('main',img)
+                    cv2.imshow('blue',data['blue_lane'])
+                    cv2.imshow('yellow',data['yellow_lane'])
+                    cv2.circle(img2,target_point,radius =10,color = (0,255,0),thickness =5 )
+                    cv2.imshow('target point', img2)
+                    k = cv2.waitKey(1)
+                    if k%256 == 27:
+                    # ESC pressed
+                        print("Escape hit, closing...")
+                        break
                 bird_out.write(img2)
                 out.write(img)
                 lane_out.write(cv2.bitwise_or(data['blue_lane'],data['yellow_lane']))
                 print(angle,target_point)
-                k = cv2.waitKey(1)
-                if k%256 == 27:
-                    # ESC pressed
-                    print("Escape hit, closing...")
-                    break
+               
                 # print(data.keys())
         except KeyboardInterrupt:
             ard.sendData(state = 0)
