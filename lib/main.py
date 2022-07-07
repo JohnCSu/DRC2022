@@ -5,11 +5,18 @@ from microcontroller.send_serial import arduino
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-
+from sys import platform
 
 CALIBRATE = False
 TEST = True
 cal_480p = np.float32([[200,153],[445,153],[0,351],[639,351]])
+
+if platform == 'linux':
+    usb_name = '/dev/ttyUSB0'
+else:
+    usb_name = 'COM5'
+    
+
 if __name__ == '__main__':
     if CALIBRATE:
         img = plt.imread('480P_cal.jpg')
@@ -19,13 +26,13 @@ if __name__ == '__main__':
 
     if TEST:
         data = input('Enter g to start')
-        if data is not 'g':
+        if data != 'g':
             exit()
 
     out = cv2.VideoWriter('Drive.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (640,480))
     
 
-    cam = camera(cam_num=1)
+    cam = camera(cam_num=0)
     ret,img = cam.read()
     img2 = cam.birdsEye(img)
     w,h = img2.shape[1],img2.shape[0]
@@ -33,7 +40,7 @@ if __name__ == '__main__':
     lane_out = cv2.VideoWriter('Lanes.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
     cam.src = cal_480p
     ctrl = control()
-    ard = arduino() #Auto start the
+    ard = arduino(port = usb_name) #Auto start the
     f = []
     while(1):
         ret,img = cam.read()
@@ -53,7 +60,6 @@ if __name__ == '__main__':
             out.write(img)
             lane_out.write(cv2.bitwise_or(data['blue_lane'],data['yellow_lane']))
             print(angle,target_point)
-            
             k = cv2.waitKey(1)
             if k%256 == 27:
                 # ESC pressed
