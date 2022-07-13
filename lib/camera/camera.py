@@ -93,9 +93,10 @@ class camera():
     #Return all the camera data needed for control
     def GetCameraData(self,img):
         img = self.calibrate(img)
-        obstacles = self.detect_object(img)
+        
         birdeye = self.birdsEye(img)
         b_lane,y_lane = self.detect_lane(birdeye)
+        obstacles = self.detect_object(birdeye)
         turn= None
         return {'turn':turn,
                 'obstacle': obstacles['object'],

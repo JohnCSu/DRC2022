@@ -17,7 +17,7 @@ class control():
         
         path = os.path.join(os.path.dirname(__file__ ),'diag.png')
         self.diag  = cv2.imread(path,cv2.IMREAD_GRAYSCALE)
-        self.start = True
+        self.begin = True
         self.state = 0
         self.foundGreen = False
 
@@ -34,24 +34,25 @@ class control():
                 return 1
             elif self.state == 1:
                 return 2
-
+        return self.state
     def Decision(self,data):
         '''
         data is a dic that contains information
         '''
         h,w = data['blue_lane'].shape
-        if self.start:
+        if self.begin:
             cv2.resize(self.diag,(w,h),self.diag)
-            self.start = False
+            self.begin = False
 
         if not self.foundGreen:
             state = self.findstartLine(data['green'])
-            if state != self.state: #If we have a change in state
-                self.start = time.perf_counter()
+            if state != self.state:
+                print(f'Going from state {self.state} to {state}') 
                 self.state = state
                 self.foundGreen = True
+                self.start = time.perf_counter()         
         else:
-            if time.perf_counter() - self.start > 3.0:
+            if (time.perf_counter() - self.start) > 2:
                 self.foundGreen = False
 
         path_points,grid = self.getPath(data['blue_lane'],data['yellow_lane'],data['obstacle'])
