@@ -16,15 +16,17 @@ Feel free to add more inputs and packages.
 '''
 import cv2
 import numpy as np
+import os 
+from tensorflow import keras
+import tensorflow as tf
 
+def turnDirection(img,orb):
+    #Convert to gray scale
 
-def turnDirection(img,net):
     
-    #This function
-    turn = None
 
 
-    return turn
+    return 0
 
 #Run your testing in the following if statement:
 #The code in this if statement will only run when you run the script (it wont run when you import this)
@@ -33,14 +35,24 @@ if __name__ == '__main__':
     vid = cv2.VideoCapture(0) # Capture From camera
     ret,frame = vid.read() #Get img fram from camera
 
+    model = keras.models.load_model('keras_model.h5')
     
-    print('Hello World')
+    size = (224,224)
+
+    data = np.ndarray(shape = (1,224,224,3))
     ##UNCOMMENT TO HAVE IMAGE FEED TO TEST YOUR FUNCTION ON
 
-    # while(True):
-    # # Capture the video frame
-    # # by frame
-    #     ret,frame = vid.read()
-    #     cv2.imshow(frame)
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #         break
+    while(True):
+    # Capture the video frame
+    # by frame
+        ret,frame = vid.read()
+        cv2.imshow('og',frame)
+        resized =cv2.resize(frame,size)
+        normalized_image_array = (resized.astype(np.float32) / 127.0) - 1
+        data[0] = normalized_image_array
+        cv2.imshow('resize',data[0])
+        prediction = model.predict(data)
+        print(prediction)
+        
+        if cv2.waitKey(1000) & 0xFF == ord('q'):
+            break

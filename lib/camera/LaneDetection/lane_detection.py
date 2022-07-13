@@ -12,20 +12,30 @@ import cv2
 import numpy as np
 
 
-def detect_lane(img,hsv_masks):
+def detect_lane(img,hsv_masks,lookupTable):
     '''
     img:Birdseyeimag
     '''
-    blur_frame = cv2.GaussianBlur(img,(5,5),0)
+    
+    white = False
+    blur_frame = cv2.GaussianBlur(img,(7,7),0)
     #Convert to HSV color scheme
     HSV_f = cv2.cvtColor(blur_frame,cv2.COLOR_BGR2HSV)
     #Hue Range is 0 to 180
     #Detect Blue for now
 
-
     blue = cv2.inRange(HSV_f,hsv_masks['blue'][0],hsv_masks['blue'][1])
     yellow = cv2.inRange(HSV_f,hsv_masks['yellow'][0],hsv_masks['yellow'][1])
 
+    corrected2=cv2.LUT(img,lookupTable)
+    corrected = cv2.cvtColor(corrected2,cv2.COLOR_BGR2HSV)
+    yellow = cv2.inRange(corrected,hsv_masks['yellow'][0],hsv_masks['yellow'][1])
+    blue = cv2.inRange(corrected,hsv_masks['blue'][0],hsv_masks['blue'][1])
+    
+    if white:
+        gray_f = cv2.cvtColor(corrected,cv2.COLOR_BGR2GRAY)
+        gray_f = cv2.inRange(gray_f,150,255)
+        return [corrected2,cv2.Canny(blue,50,150)]
     return np.array([cv2.Canny(mask,50,150) for mask in [blue,yellow]])
     
 
@@ -52,13 +62,3 @@ if __name__ == '__main__':
     
 
     print('Hello World')
-
-    ##UNCOMMENT TO HAVE IMAGE FEED TO TEST YOUR FUNCTION ON
-
-    # while(True):
-    # # Capture the video frame
-    # # by frame
-    #     ret,frame = vid.read()
-    #     cv2.imshow(frame)
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #         break

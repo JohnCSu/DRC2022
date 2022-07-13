@@ -1,6 +1,6 @@
 
 
-from camera.birdsEye.birdEye import birdsEye
+from camera.birdsEye.birdEye import birdsEye,getROIwarp
 from camera.Calibrate.calibrate import calibrate 
 from camera.Classification.classification import turnDirection
 from camera.ObjectDetection.object_detection import detect_object
@@ -16,14 +16,27 @@ from sys import platform
 #Executes all the camera stuff and returns a dictionary for the state to control
 
 class camera():
-    def __init__(self,cam_num =1,resolution = (640,480)):
+    def __init__(self,cam_num =1,resolution = (640,480),gamma = 3):
         #set Camera feed and set camera dimensions:
         self.setCamera(cam_num,resolution)
-        #For Lane Detection
+        #For Lane and Object Detection
         self.hsv_masks =  {
             'blue' : ( np.array([180//2, 63, 63]) , np.array([270//2, 255, 255])),
-            'yellow':(np.array([40//2, 63, 63]),np.array([60//2, 255, 255]))
+            'yellow':(np.array([40//2, 10, 63]),np.array([70//2, 255, 255]))
+
         }
+        self.obj_masks = {
+            'object': (np.array([135, 87, 111], np.uint8),np.array([180, 255, 255], np.uint8)),
+            'object2': (np.array([0, 87, 111], np.uint8),np.array([10, 255, 255], np.uint8)),
+            'green': (np.array([35, 52, 72], np.uint8),np.array([82, 255, 255], np.uint8)),
+                }
+
+
+        self.gamma = gamma
+        self.lookUpTable = np.empty((1,256), np.uint8)
+        for i in range(256):
+            self.lookUpTable[0,i] = np.clip(pow(i / 255.0, self.gamma) * 255.0, 0, 255)
+
 
         #For Calibration
         cal_path = os.path.join(os.path.dirname(checkers.__file__ ),'calibration_params')
@@ -49,21 +62,18 @@ class camera():
         self.height = self.cam.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float `height`
 
 
-    def setROI(self,src=None):
+    def setROI(self,grad_p = np.float32([[200,153],[445,153],[0,351],[639,351]]),roi_p = np.float32([[0,135],[639,135],[0,450],[639,450]])):
+        self.grad_p = grad_p
+        self.roi_p = roi_p
         #Parameters for birds eye
-        if src is None:
-            self.src = np.float32([[166,194],[500,194],[0,340],[639,340]])
-        else:
-            self.src =src
-        self.persp_width = int(norm( np.subtract(self.src[2],self.src[3]))) #Gets lower right and left length (iso trap so always lower points length will be max length)
-        self.persp_height =int(norm(np.subtract(self.src[0],self.src[2]))) # Gets a length (iso trapezium so any height)
-        self.dst =np.float32( [
-            [0,0],
-            [self.persp_width-1,0],
-            [0,self.persp_height-1],
-            [self.persp_width-1,self.persp_height-1 ]
-        ] )
-        self.persp_M = cv2.getPerspectiveTransform(self.src,self.dst)
+        dst,(w,h) = getROIwarp(grad_p,roi_p) 
+        self.persp_width = w
+        self.persp_height = h
+        
+    # corrected = cv2.convertScaleAbs(img,alpha = 0.8,beta = -50)
+    # persp_M = cv2.getPerspectiveTransform(grad_p,dst)
+        self.persp_M = cv2.getPerspectiveTransform(roi_p,dst)
+        
     #Returns the ret,frame of video capture
     def read(self):
         return self.cam.read()
@@ -76,17 +86,20 @@ class camera():
     def birdsEye(self,img):
         return birdsEye(img,self.persp_width,self.persp_height,self.persp_M)
 
+    def detect_object(self,img):
+        return detect_object(img,self.obj_masks,roi_h = (int(self.roi_p[0][1]),int(self.roi_p[2][1])))
     def detect_lane(self,img):
-        return detect_lane(img,self.hsv_masks)
+        return detect_lane(img,self.hsv_masks,self.lookUpTable)
     #Return all the camera data needed for control
     def GetCameraData(self,img):
         img = self.calibrate(img)
+        obstacles = self.detect_object(img)
         birdeye = self.birdsEye(img)
-        b_lane,y_lane = detect_lane(birdeye,self.hsv_masks)
+        b_lane,y_lane = self.detect_lane(birdeye)
         turn= None
-        obstacle = None
         return {'turn':turn,
-                'obstacle': obstacle,
+                'obstacle': obstacles['object'],
+                'green' : obstacles['green'],
                 'blue_lane': b_lane,
                 'yellow_lane':y_lane
                 }
