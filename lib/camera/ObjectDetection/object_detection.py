@@ -54,7 +54,7 @@ def detect_object(img,hsv_masks,area = [700,1000]):
 #The code in this if statement will only run when you run the script (it wont run when you import this)
 if __name__ == '__main__':
     #Feel free to modify where fit
-    vid = cv2.VideoCapture(0,cv2.CAP_DSHOW) # Capture From camera
+    vid = cv2.VideoCapture(1,cv2.CAP_DSHOW) # Capture From camera
     # ret,frame = vid.read() #Get img fram from camera
     # cv2.imshow(frame)
     
@@ -63,9 +63,9 @@ if __name__ == '__main__':
     ##UNCOMMENT TO HAVE IMAGE FEED TO TEST YOUR FUNCTION ON
 
     hsv_masks = {
-        'object': (np.array([135, 87, 111], np.uint8),np.array([180, 255, 255], np.uint8)),
+        'object': (np.array([135, 50, 50], np.uint8),np.array([180, 255, 255], np.uint8)),
         'object2': (np.array([0, 87, 111], np.uint8),np.array([10, 255, 255], np.uint8)),
-        'green': (np.array([35, 52, 72], np.uint8),np.array([82, 255, 255], np.uint8)),
+        'green': (np.array([45, 52, 50], np.uint8),np.array([82, 255, 255], np.uint8)),
         
     }
     while(True):

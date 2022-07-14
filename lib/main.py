@@ -67,7 +67,7 @@ else:
     usb_name = 'COM5'
     cam_num=1
 
-cam_num = 0
+cam_num =1
 
 if __name__ == '__main__':
     if CALIBRATE:
