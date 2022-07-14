@@ -27,14 +27,16 @@ import cv2
 import numpy as np
 
 
-def detect_object(img,hsv_masks,area = [700,1000]):
+def detect_object(img,hsv_masks,area = [400,4000]):
 
     hsv_f = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = {}
     obj_d = {'object' : [],'green' : []}
-    mask['object'] = cv2.bitwise_or(cv2.inRange(hsv_f,hsv_masks['object'][0], hsv_masks['object'][1]),cv2.inRange(hsv_f,hsv_masks['object2'][0], hsv_masks['object2'][1])),area[0]
-    mask['green'] = cv2.inRange(hsv_f,hsv_masks['green'][0], hsv_masks['green'][1]),area[1]
+    mask['object'] = [cv2.bitwise_or(cv2.inRange(hsv_f,hsv_masks['object'][0], hsv_masks['object'][1]),cv2.inRange(hsv_f,hsv_masks['object2'][0], hsv_masks['object2'][1])),area[0]]
+    mask['green'] = [cv2.inRange(hsv_f,hsv_masks['green'][0], hsv_masks['green'][1]),area[1]]
 
+    # mask['object'][0] = mask['object'][0][210:450,:]  
+    # mask['green'][0] = mask['green'][0][210:450,:]
     kernal = np.ones((9, 9), "uint8")
 
     for col,(mask,area_threshold) in mask.items():
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     ##UNCOMMENT TO HAVE IMAGE FEED TO TEST YOUR FUNCTION ON
 
     hsv_masks = {
-        'object': (np.array([135, 50, 50], np.uint8),np.array([180, 255, 255], np.uint8)),
+        'object': (np.array([130, 50, 50], np.uint8),np.array([180, 255, 255], np.uint8)),
         'object2': (np.array([0, 87, 111], np.uint8),np.array([10, 255, 255], np.uint8)),
         'green': (np.array([45, 52, 50], np.uint8),np.array([82, 255, 255], np.uint8)),
         

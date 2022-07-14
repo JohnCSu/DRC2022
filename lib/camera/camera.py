@@ -26,7 +26,7 @@ class camera():
 
         }
         self.obj_masks = {
-            'object': (np.array([135, 87, 111], np.uint8),np.array([180, 255, 255], np.uint8)),
+            'object': (np.array([120, 50, 50], np.uint8),np.array([180, 255, 255], np.uint8)),
             'object2': (np.array([0, 87, 111], np.uint8),np.array([10, 255, 255], np.uint8)),
             'green': (np.array([35, 52, 72], np.uint8),np.array([82, 255, 255], np.uint8)),
                 }

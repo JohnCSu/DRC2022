@@ -52,7 +52,7 @@ class control():
                 self.foundGreen = True
                 self.start = time.perf_counter()         
         else:
-            if (time.perf_counter() - self.start) > 2:
+            if (time.perf_counter() - self.start) > 100:
                 self.foundGreen = False
 
         path_points,grid = self.getPath(data['blue_lane'],data['yellow_lane'],data['obstacle'])

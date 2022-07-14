@@ -67,7 +67,7 @@ else:
     usb_name = 'COM5'
     cam_num=1
 
-cam_num =1
+
 
 if __name__ == '__main__':
     if CALIBRATE:
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     bird_out = cv2.VideoWriter('Birdseye.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
     lane_out = cv2.VideoWriter('Lanes.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
     ctrl = control()
-    ard = arduino(port = usb_name) #Auto start the
+    # ard = arduino(port = usb_name) #Auto start the
     f = []
     while(1):
         try:
@@ -113,16 +113,22 @@ if __name__ == '__main__':
             f.append(img)
             data = cam.GetCameraData(img)
             angle,speed,state,target_points,grid = ctrl.Decision(data)
-            ard.sendData(angle,speed = 100,state = state)
+            # ard.sendData(angle,speed = 100,state = state)
 
             if TEST:
                 img2 = cam.birdsEye(img)
                 if SHOW:    
                     cv2.imshow('main',img)
                     cv2.imshow('blue',grid)
+                    for o in data['green']:
+                        x1,y1,w,h = o
+                        cv2.rectangle(img2,(x1,y1),(x1+w,y1+h),color = [0,255,0],thickness = 4)
+                    
                     for target_point in target_points:
                         cv2.circle(img2,target_point,radius =10,color = (0,255,0),thickness =5 )
                     cv2.imshow('target point', img2)
+
+                    
                     # print(angle)
                     k = cv2.waitKey(50)
                     if k%256 == 27:
@@ -136,7 +142,7 @@ if __name__ == '__main__':
                 # print(data.keys())
         except KeyboardInterrupt:
             print('\nTERMINATING\n')
-            ard.sendData(state = 5)
+            # ard.sendData(state = 5)
             exit()
 
     if TEST:
@@ -144,4 +150,4 @@ if __name__ == '__main__':
         out.release()
         bird_out.release()
         lane_out.release()
-    ard.sendData(state = 0)
+    # ard.sendData(state = 0)

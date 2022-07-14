@@ -48,7 +48,6 @@ def findStart(lane,i_start ,side = 'right',block_size = (40,40),threshold = 20):
 
 
 def SetMasks(lanes,diag,starting_points):
-    
     y1,x1,y2,x2 = starting_points    
     grid = cv2.bitwise_or(lanes[0][0],lanes[1][0])
     cv2.bitwise_or(grid,diag,grid)
@@ -67,8 +66,9 @@ def getMidPoint(grid,starting_points,num_points = 20, endpoint = None):
 
     x1 = starting_points[0][1]
     x2 = starting_points[1][1]
-    mid_point = (x1+x2)//2
-
+    mid_point = w//2
+    
+    min_h = h
     step = h//num_points
 
     if endpoint is None:
@@ -90,8 +90,17 @@ def getMidPoint(grid,starting_points,num_points = 20, endpoint = None):
         else:
             right_p = np.max(boundary)+mid_point
         
+        #Get indices of each col
+
+        min_h = min(min_h, min([ np.min(np.nonzero(col)[0]) for col in np.transpose(grid[:,left_p:right_p]) if len(np.nonzero(col)[0]) > 0   ]) )
+
         mid_point = (left_p+right_p)//2
+
         row_idx = h-1-i*(step)
+
+        if h-1-(i+1)*step < min_h:
+            return (mid_point,row_idx)
+        
 
         yield (mid_point,row_idx)
     

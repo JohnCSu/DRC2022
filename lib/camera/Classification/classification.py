@@ -31,14 +31,13 @@ def turnDirection(img,orb):
 #The code in this if statement will only run when you run the script (it wont run when you import this)
 if __name__ == '__main__':
     #Feel free to modify where fit
-    vid = cv2.VideoCapture(0) # Capture From camera
+    vid = cv2.VideoCapture(1,cv2.CAP_DSHOW) # Capture From camera
     ret,frame = vid.read() #Get img fram from camera
 
     #model = keras.models.load_model('keras_model.h5')
     
     size = (224,224)
 
-    data = np.ndarray(shape = (1,224,224,3))
     ##UNCOMMENT TO HAVE IMAGE FEED TO TEST YOUR FUNCTION ON
 
     while(True):
@@ -46,12 +45,8 @@ if __name__ == '__main__':
     # by frame
         ret,frame = vid.read()
         cv2.imshow('og',frame)
-        resized =cv2.resize(frame,size)
-        normalized_image_array = (resized.astype(np.float32) / 127.0) - 1
-        data[0] = normalized_image_array
-        cv2.imshow('resize',data[0])
-        prediction = model.predict(data)
-        print(prediction)
-        
-        if cv2.waitKey(1000) & 0xFF == ord('q'):
+        gray = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)
+        gray_filter = cv2.inRange(gray,0,100)
+        cv2.imshow('og',gray_filter)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
