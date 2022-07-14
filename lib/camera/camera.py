@@ -6,6 +6,7 @@ from camera.Classification.classification import turnDirection
 from camera.ObjectDetection.object_detection import detect_object
 from camera.LaneDetection.lane_detection import detect_lane
 from camera.Calibrate.CheckerBoard import checkerboard as checkers
+import camera.Classification.classification  as classification
 import pickle
 import numpy as np
 from numpy.linalg import norm
@@ -13,6 +14,7 @@ import cv2
 import os
 from matplotlib import pyplot as plt 
 from sys import platform
+import time
 #Executes all the camera stuff and returns a dictionary for the state to control
 
 class camera():
@@ -45,7 +47,11 @@ class camera():
 
         #For Birds Eye view
         self.setROI()
-    
+
+
+        #For Classification
+        self.isturn = False
+        self.turn = 'straight'
     def setCamera(self,cam_num,resolution):
         self.cam_num = cam_num
         if isinstance(cam_num,str):
@@ -90,6 +96,8 @@ class camera():
         return detect_object(img,self.obj_masks)
     def detect_lane(self,img):
         return detect_lane(img,self.hsv_masks,self.lookUpTable)
+    def turn_direction(self,img):
+        return turnDirection(img)
     #Return all the camera data needed for control
     def GetCameraData(self,img):
         img = self.calibrate(img)
@@ -97,8 +105,20 @@ class camera():
         birdeye = self.birdsEye(img)
         b_lane,y_lane = self.detect_lane(birdeye)
         obstacles = self.detect_object(birdeye)
-        turn= None
-        return {'turn':turn,
+
+        if not self.isturn:
+            turn = self.turn_direction(birdeye)
+            if turn != self.turn: #New Turn
+                print(f'turning {turn}')
+                self.start = time.perf_counter()
+                self.isturn = True
+                self.turn = turn
+        else:
+            if time.perf_counter()-self.start > 2:
+                self.isturn = False
+                self.turn = 'straight'
+
+        return {'turn':self.turn,
                 'obstacle': obstacles['object'],
                 'green' : obstacles['green'],
                 'blue_lane': b_lane,

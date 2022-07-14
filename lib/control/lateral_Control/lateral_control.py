@@ -12,6 +12,7 @@ def purePursuit(height,width,w2w,l_cam,target_points):
     assume that halfway of image is
     Target point: tuple (x,y)
     '''
+    
     #Split Data up into Thirds and average and weight them
     x,y = target_points[:,0],target_points[:,1]
     split = len(x)//4
@@ -24,11 +25,13 @@ def purePursuit(height,width,w2w,l_cam,target_points):
         46 cm at 450,150 at 210 edge
         '''
         xt,yt = x[i*split:(i+1)*split],y[i*split:(i+1)*split]
-        xt,yt = np.mean(xt),yt[-1]
+        if len(xt) > 0:
+            xt,yt = np.mean(xt),yt[-1]
+        else:
+            xt,yt = width//2,height//(i+1)
         mid_point = (width/2,yt)
         l_cam,w_cam = vert[0]*yt + vert[1],hor*(mid_point[0]-xt)
-        
-        
+    
         ld = hypot(l_cam,w_cam)
         
         

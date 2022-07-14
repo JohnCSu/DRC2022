@@ -46,7 +46,9 @@ def detect_object(img,hsv_masks,area = [400,4000]):
             area = cv2.contourArea(contour)
             if(area > area_threshold):
                 x, y, w, h = cv2.boundingRect(contour)
-                obj_d[col].append((x,y,w,h))
+                aspect_ratio = w/h
+                if col == 'green' and aspect_ratio > 2:
+                    obj_d[col].append((x,y,w,h))
 
     return obj_d
 

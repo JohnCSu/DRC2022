@@ -66,6 +66,7 @@ if platform == 'linux':
 else:
     usb_name = 'COM5'
     cam_num=1
+    cam_num = '4.mp4'
 
 
 
@@ -92,7 +93,7 @@ if __name__ == '__main__':
         if data != 'g':
             exit()
 
-    out = cv2.VideoWriter('Drive.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (640,480))
+    # out = cv2.VideoWriter('Drive.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (640,480))
     
 
     cam = camera(cam_num)
@@ -102,15 +103,14 @@ if __name__ == '__main__':
     
     
     w,h = img2.shape[1],img2.shape[0]
-    bird_out = cv2.VideoWriter('Birdseye.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
-    lane_out = cv2.VideoWriter('Lanes.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
+    # bird_out = cv2.VideoWriter('Birdseye.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
+    # lane_out = cv2.VideoWriter('Lanes.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
     ctrl = control()
     # ard = arduino(port = usb_name) #Auto start the
-    f = []
     while(1):
         try:
             ret,img = cam.read()
-            f.append(img)
+            img = cv2.resize(img,(640,480),cv2.INTER_AREA)
             data = cam.GetCameraData(img)
             angle,speed,state,target_points,grid = ctrl.Decision(data)
             # ard.sendData(angle,speed = 100,state = state)
@@ -135,9 +135,6 @@ if __name__ == '__main__':
                     # ESC pressed
                         print("Escape hit, closing...")
                         break
-                bird_out.write(img2)
-                out.write(img)
-                lane_out.write(cv2.bitwise_or(data['blue_lane'],data['yellow_lane']))
                
                 # print(data.keys())
         except KeyboardInterrupt:
@@ -147,7 +144,4 @@ if __name__ == '__main__':
 
     if TEST:
         cv2.destroyAllWindows()
-        out.release()
-        bird_out.release()
-        lane_out.release()
     # ard.sendData(state = 0)

@@ -21,8 +21,8 @@ class control():
         self.state = 0
         self.foundGreen = False
 
-    def getPath(self, blue,yellow,objects):
-        return getpath(blue,yellow,objects,self.block_size,self.diag)
+    def getPath(self, blue,yellow,objects,bias):
+        return getpath(blue,yellow,objects,self.block_size,self.diag,bias)
 
     def PurePursuit(self,h,w,target_point):
         return purePursuit(h,w,self.wheel_to_wheel_dist,self.wheel_to_edge_dist, target_point)
@@ -46,6 +46,7 @@ class control():
 
         if not self.foundGreen:
             state = self.findstartLine(data['green'])
+            
             if state != self.state:
                 print(f'Going from state {self.state} to {state}') 
                 self.state = state
@@ -55,7 +56,7 @@ class control():
             if (time.perf_counter() - self.start) > 100:
                 self.foundGreen = False
 
-        path_points,grid = self.getPath(data['blue_lane'],data['yellow_lane'],data['obstacle'])
+        path_points,grid = self.getPath(data['blue_lane'],data['yellow_lane'],data['obstacle'],data['turn'])
         # print(target_point)
         angle = self.PurePursuit(h,w,path_points)
         speed = 110 #CHANGE to function of angle

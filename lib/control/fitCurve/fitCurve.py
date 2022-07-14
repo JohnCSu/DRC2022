@@ -57,18 +57,28 @@ def SetMasks(lanes,diag,starting_points):
  
 
 
-def getMidPoint(grid,starting_points,num_points = 20, endpoint = None):
+def getMidPoint(grid,starting_points,num_points = 20, endpoint = None,bias = 'straight'):
     #Should be a merged 
     #Start from bot and work your way up
     h,w = grid.shape
     
     #Basically FizzBang
 
+
+
     x1 = starting_points[0][1]
     x2 = starting_points[1][1]
-    mid_point = w//2
+    y,_ = np.nonzero(grid[:,x1:x2])
+    if len(y) > 2:
+        min_h = np.min(y)
+    else:
+        min_h = 0
     
-    min_h = h
+    
+    mid_point = w//2
+
+    
+    
     step = h//num_points
 
     if endpoint is None:
@@ -92,16 +102,22 @@ def getMidPoint(grid,starting_points,num_points = 20, endpoint = None):
         
         #Get indices of each col
 
-        min_h = min(min_h, min([ np.min(np.nonzero(col)[0]) for col in np.transpose(grid[:,left_p:right_p]) if len(np.nonzero(col)[0]) > 0   ]) )
+        # min_h = min(min_h, np.median([ np.min(np.nonzero(col)[0]) for col in np.transpose(grid[:,left_p:right_p]) if len(np.nonzero(col)[0]) > 0   ]) )
+
+
 
         mid_point = (left_p+right_p)//2
+
+        if bias == 'right':
+            mid_point += abs(mid_point-right_p)//3
+        elif bias == 'left':
+            mid_point -= abs(mid_point-left_p)//3
 
         row_idx = h-1-i*(step)
 
         if h-1-(i+1)*step < min_h:
             return (mid_point,row_idx)
         
-
         yield (mid_point,row_idx)
     
 def fitPath(mid_points):
@@ -115,7 +131,7 @@ def addObjects(objects,grid):
         grid[0:y+h,x:x+w] = 255
     return grid
 
-def getpath(blue,yellow,objects,block_size,diag):
+def getpath(blue,yellow,objects,block_size,diag,bias):
     i_left,i_right = np.nonzero(diag[-1])[0] 
     # print(i_left,i_right) 
     lanes = ([findStart(l,i_start,side,block_size) for l,side,i_start in zip([yellow,blue],['left','right'],(i_left,i_right)) ])
@@ -123,7 +139,7 @@ def getpath(blue,yellow,objects,block_size,diag):
 
     grid = SetMasks(lanes,diag,starting_points)
     grid = addObjects(objects,grid)
-    mid_points = np.array([ mid_point for mid_point in getMidPoint(grid,(lanes[0][1],lanes[1][1]) )])
+    mid_points = np.array([ mid_point for mid_point in getMidPoint(grid,(lanes[0][1],lanes[1][1]),bias = bias )])
     return mid_points,grid
 
 
