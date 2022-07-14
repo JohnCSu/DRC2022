@@ -87,7 +87,7 @@ class camera():
         return birdsEye(img,self.persp_width,self.persp_height,self.persp_M)
 
     def detect_object(self,img):
-        return detect_object(img,self.obj_masks,roi_h = (int(self.roi_p[0][1]),int(self.roi_p[2][1])))
+        return detect_object(img,self.obj_masks)
     def detect_lane(self,img):
         return detect_lane(img,self.hsv_masks,self.lookUpTable)
     #Return all the camera data needed for control

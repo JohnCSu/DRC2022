@@ -17,8 +17,7 @@ Feel free to add more inputs and packages.
 import cv2
 import numpy as np
 import os 
-from tensorflow import keras
-import tensorflow as tf
+
 
 def turnDirection(img,orb):
     #Convert to gray scale
@@ -35,7 +34,7 @@ if __name__ == '__main__':
     vid = cv2.VideoCapture(0) # Capture From camera
     ret,frame = vid.read() #Get img fram from camera
 
-    model = keras.models.load_model('keras_model.h5')
+    #model = keras.models.load_model('keras_model.h5')
     
     size = (224,224)
 

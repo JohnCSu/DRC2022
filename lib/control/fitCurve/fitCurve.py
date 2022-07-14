@@ -109,7 +109,7 @@ def addObjects(objects,grid):
 def getpath(blue,yellow,objects,block_size,diag):
     i_left,i_right = np.nonzero(diag[-1])[0] 
     # print(i_left,i_right) 
-    lanes = ([findStart(l,i_start,side,block_size) for l,side,i_start in zip([blue,yellow],['left','right'],(i_left,i_right)) ])
+    lanes = ([findStart(l,i_start,side,block_size) for l,side,i_start in zip([yellow,blue],['left','right'],(i_left,i_right)) ])
     starting_points = lanes[0][1]+lanes[1][1]
 
     grid = SetMasks(lanes,diag,starting_points)
