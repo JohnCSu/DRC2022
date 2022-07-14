@@ -105,7 +105,7 @@ if __name__ == '__main__':
     bird_out = cv2.VideoWriter('Birdseye.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
     lane_out = cv2.VideoWriter('Lanes.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10, (w,h))
     ctrl = control()
-    # ard = arduino(port = usb_name) #Auto start the
+    ard = arduino(port = usb_name) #Auto start the
     f = []
     while(1):
         try:
@@ -113,7 +113,7 @@ if __name__ == '__main__':
             f.append(img)
             data = cam.GetCameraData(img)
             angle,speed,state,target_points,grid = ctrl.Decision(data)
-            # ard.sendData(angle,speed = 100,state = state)
+            ard.sendData(angle,speed = 100,state = state)
 
             if TEST:
                 img2 = cam.birdsEye(img)
@@ -136,7 +136,7 @@ if __name__ == '__main__':
                 # print(data.keys())
         except KeyboardInterrupt:
             print('\nTERMINATING\n')
-            # ard.sendData(state = 5)
+            ard.sendData(state = 5)
             exit()
 
     if TEST:
@@ -144,4 +144,4 @@ if __name__ == '__main__':
         out.release()
         bird_out.release()
         lane_out.release()
-    # ard.sendData(state = 0)
+    ard.sendData(state = 0)
